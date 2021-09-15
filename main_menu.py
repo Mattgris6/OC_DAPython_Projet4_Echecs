@@ -1,8 +1,10 @@
 from tkinter.messagebox import *
 from tkinter import *
 import os
+from view_create_tournament import CreateTournament
+from PIL import ImageTk, Image
 
-class MenuPrincipal():
+class MainMenu():
     """Home page"""
     def __init__(self):
         self.window = Tk()
@@ -32,19 +34,23 @@ class MenuPrincipal():
         self.button_quit=Button(
             self.window,
             text="Fermer",
-            command=self.window.quit
+            command=self.window.destroy
             )
         self.button_quit.place(relx = 0.9, rely = 0.9, anchor=CENTER)
         # Insert an image of chess
-        image_file = os.path.abspath(os.path.dirname(__file__)) + r'/Ressources/image_menu.jpg'
-        image_menu = PhotoImage(image_file)
+        image_file = os.path.abspath(os.path.dirname(__file__)) + r'/Ressources/image_menu.png'
+        image_menu = Image.open(image_file)
+        image_menu = image_menu.resize((105,105), Image.ANTIALIAS)
+        image_menu = ImageTk.PhotoImage(image_menu)
         self.canvas_image = Canvas(self.window, width=100, height=100, bg='blue')
         self.canvas_image.create_image(0, 0, anchor=NW, image=image_menu)
+        self.canvas_image.image = image_menu
         self.canvas_image.place(relx = 0.9, rely = 0.2, anchor=NE)
 
     def new_tournament(self):
         """Run the page to create a new tournament"""
-        showinfo("Tournoi", "Nouveau tournoi!")
+        tournoi = CreateTournament()
+        tournoi.run()
 
     def historic(self):
         """Show the page of Historic"""
