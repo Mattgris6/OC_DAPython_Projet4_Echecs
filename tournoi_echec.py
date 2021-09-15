@@ -2,7 +2,7 @@ from modele import Tournoi
 from controleur import Organisation
 from vue import Vue
 from tinydb import TinyDB
-
+from main_menu import MainMenu
 
 '''serialized_players = []
 joueurs = [['Matthieu', 'Grison', '20/12/1992', 'Homme'],
@@ -30,5 +30,7 @@ nouveau_tournoi = Tournoi("Premier tournoi", "Toulouse")
 nouvelle_vue = Vue()
 
 
-nouvelle_organistaion = Organisation(nouveau_tournoi, nouvelle_vue)
-nouvelle_organistaion.run()
+# nouvelle_organistaion = Organisation(nouveau_tournoi, nouvelle_vue)
+# nouvelle_organistaion.run()
+menu = MainMenu()
+menu.run()
