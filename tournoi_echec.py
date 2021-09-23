@@ -30,7 +30,7 @@ nouveau_tournoi = Tournoi("Premier tournoi", "Toulouse")
 nouvelle_vue = Vue()
 
 
-# nouvelle_organistaion = Organisation(nouveau_tournoi, nouvelle_vue)
-# nouvelle_organistaion.run()
+#nouvelle_organistaion = Organisation(nouveau_tournoi, nouvelle_vue)
+#nouvelle_organistaion.run()
 menu = MainMenu()
 menu.run()

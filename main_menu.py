@@ -8,8 +8,16 @@ class MainMenu():
     """Home page"""
     def __init__(self):
         self.window = Tk()
+        w = 300 # width for the self.window
+        h = 200 # height for the self.window
+        # get screen width and height
+        ws = self.window.winfo_screenwidth() # width of the screen
+        hs = self.window.winfo_screenheight() # height of the screen
+        # calculate x and y coordinates for the self.window
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2)
         self.window.title('Gestionnaire de tournoi')
-        self.window.geometry("300x200+0+0")
+        self.window.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.label_menu = Label(self.window, text="Menu principal")
         self.label_menu.place(relx = 0.5, rely = 0.1, anchor=CENTER)
         # We create all buttons we need for home page

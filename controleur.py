@@ -51,7 +51,11 @@ class Organisation():
         self.tournoi.rondes.append(premier_tour)
 
     def apparier_joueur_suivante(self):
-        liste_joueurs = sorted(self.tournoi.joueurs, key = lambda tri: tri.classement, reverse=True)
+        liste_joueurs = sorted(
+            self.tournoi.joueurs,
+            key = lambda tri: tri.classement,
+            reverse=True,
+            )
         liste_joueurs = sorted(liste_joueurs, key = lambda tri: tri.points, reverse=True)
         liste_matchs = []
         ctrl = 0
