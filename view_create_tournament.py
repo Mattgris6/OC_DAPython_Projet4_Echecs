@@ -6,6 +6,7 @@ from tkinter import scrolledtext
 
 class CreateTournament():
     def __init__(self):
+        self.tournament = None
         self.window = tk.Tk()
         w = 600  # width for the self.window
         h = 400  # height for the self.window
@@ -85,4 +86,5 @@ class CreateTournament():
         self.button_player_default.place(relx=0.5, rely=0.80, anchor=tk.CENTER)
 
     def cancel(self):
+        self.tournament = None
         self.window.destroy()
