@@ -1,72 +1,81 @@
-from tkinter.messagebox import showinfo
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
-from tkinter import scrolledtext
-from modele import Joueur
-# from tkinter import *
 
 
 class TournamentMenu():
-    def __init__(self, tournoi):
-        self.window = Tk()
-        self.window.title('Nouveau joueur')
-        self.window.geometry("300x200+0+0")
-        # Get player infos
-        self.new_player = None
-        self.label_name = ttk.Label(self.window, text="Nom : ")
-        self.label_name.grid(row=1, column=1, padx=5, pady=5)
-        self.name = ttk.Entry(self.window, width=25)
-        self.name.grid(row=1, column=2, padx=5, pady=5)
-        self.label_name2 = ttk.Label(self.window, text="Prénom : ")
-        self.label_name2.grid(row=2, column=1, padx=5, pady=5)
-        self.name2 = ttk.Entry(self.window, width=25)
-        self.name2.grid(row=2, column=2, padx=5, pady=5)
-        self.label_birthday = ttk.Label(self.window, text="Date de naissance : ")
-        self.label_birthday.grid(row=3, column=1, padx=5, pady=5)
-        self.birthday = ttk.Entry(self.window, width=25)
-        self.birthday.grid(row=3, column=2, padx=5, pady=5)
-        self.label_classement = ttk.Label(self.window, text="Classement : ")
-        self.label_classement.grid(row=4, column=1, padx=5, pady=5)
-        self.classement = ttk.Entry(self.window, width=25)
-        self.classement.grid(row=4, column=2, padx=5, pady=5)
-        self.radio_value = StringVar(self.window)
-        self.button_man = ttk.Radiobutton(
+    def __init__(self, tournament):
+        self.tournament = tournament
+        self.window = tk.Tk()
+        w = 600  # width for the self.windowt
+        h = 400  # height for the self.window
+        # get screen width and height
+        ws = self.window.winfo_screenwidth()  # width of the screen
+        hs = self.window.winfo_screenheight()  # height of the screen
+        # calculate x and y coordinates for the self.window window
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2)
+        self.window.title(f'Gestion du tournoi {tournament.name}')
+        self.window.geometry("%dx%d+%d+%d" % (w, h, x, y))
+        self.window.resizable(False, False)
+        self.round_frame = None
+        self.ranking_frame = None
+        self.ranking_label = ttk.Label(self.window, text='Classement :')
+        self.ranking_label.grid(row=0, column=2, padx=5, pady=5)
+        self.num_round = tk.StringVar(self.window)
+        self.num_round.set(f'Round {len(self.tournament.rounds)}')
+        self.round_label = ttk.Label(self.window)
+        self.round_label.grid(row=0, column=0, padx=5, pady=5)
+        self.round_begin_button = ttk.Button(
             self.window,
-            text='Homme',
-            value='Homme',
-            variable=self.radio_value,
+            text='Commencer le round suivant',
         )
-        self.button_man.grid(row=5, column=1, padx=5, pady=5)
-        self.button_woman = ttk.Radiobutton(
+        self.round_begin_button.grid(row=1, column=0, padx=5, pady=5)
+        self.round_save_button = ttk.Button(
             self.window,
-            text='Femme',
-            value='Femme',
-            variable=self.radio_value,
+            text='Enregistrer les résultats et terminer le round',
         )
-        self.button_woman.grid(row=5, column=2, padx=5, pady=5)
-        
-        self.button_add = ttk.Button(
-            self.window,
-            text="Ajouter le joueur",
-            command=self.save_player,
+        self.round_save_button.grid(row=2, column=0, padx=5, pady=5)
+        self.display_ranking()
+
+    def display_ranking(self):
+        if self.ranking_frame:
+            self.ranking_frame.destroy()
+        self.ranking_frame = ttk.Frame(self.window, borderwidth=2, relief=tk.GROOVE)
+        self.ranking_frame.grid(
+            row=1,
+            column=2,
+            rowspan=8,
+            columnspan=3,
+            sticky="W",
+            padx=5,
+            pady=5,
             )
-        self.button_add.grid(row=7, column=1, padx=5, pady=5)
-        # Quit window
-        self.button_quit = ttk.Button(
-            self.window,
-            text="Fermer",
-            command=self.cancel,
+        players = sorted(self.tournament.players, key=lambda tri: tri.ranking, reverse=True)
+        players = sorted(players, key=lambda tri: tri.points, reverse=True)
+        for player in players:
+            player_index = players.index(player)
+            player_title = f'{player.name} {player.first_name} : {player.points}pts'
+            player_label = ttk.Label(self.ranking_frame, text=player_title)
+            player_label.grid(row=player_index, column=0)
+
+    def display_current_round(self):
+        if self.round_frame:
+            self.round_frame.destroy()
+        self.round_frame = ttk.Frame(self.window, borderwidth=2, relief=tk.GROOVE)
+        self.round_frame.grid(
+            row=3,
+            column=0,
+            rowspan=7,
+            columnspan=2,
+            sticky="W",
+            padx=5,
+            pady=5,
             )
-        self.button_quit.grid(row=7, column=2, padx=5, pady=5)
-
-    def cancel(self):
-        self.new_player = None
-        self.window.destroy()
-
-    def save_player(self):
-        self.new_player = Joueur(self.name.get(), self.name2.get(), self.birthday.get(), self.radio_value.get(), self.classement.get())
-        self.window.destroy()
-
-    def run(self):
-        self.window.wait_window()
-        return self.new_player
+        round = self.tournament.rounds[-1]
+        for match in round.matchs:
+            match_index = round.matchs.index(match)
+            player1 = f'{match[0][0].first_name} {match[0][0].name}'
+            player2 = f'{match[1][0].first_name} {match[1][0].name}'
+            match_title = f'{player1} vs {player2}'
+            match_label = ttk.Label(self.round_frame, text=match_title)
+            match_label.grid(row=match_index, column=0)
