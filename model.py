@@ -12,12 +12,12 @@ joueurs = [['Matthieu', 'Grison', '20/12/1992', 'Homme', 6000],
 
 
 class Player():
-    def __init__(self, name, first_name, birthday, sex, classement=0):
+    def __init__(self, name, first_name, birthday, sex, ranking=0):
         self.name = name
         self.first_name = first_name
         self.birthday = birthday
         self.sex = sex
-        self.classement = classement
+        self.ranking = ranking
         self.points = 0
 
 
