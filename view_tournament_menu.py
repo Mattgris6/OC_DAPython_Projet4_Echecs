@@ -6,7 +6,7 @@ class TournamentMenu():
     def __init__(self, tournament):
         self.tournament = tournament
         self.window = tk.Tk()
-        w = 600  # width for the self.windowt
+        w = 800  # width for the self.windowt
         h = 400  # height for the self.window
         # get screen width and height
         ws = self.window.winfo_screenwidth()  # width of the screen
@@ -23,18 +23,18 @@ class TournamentMenu():
         self.ranking_label.grid(row=0, column=2, padx=5, pady=5)
         self.num_round = tk.StringVar(self.window)
         self.num_round.set(f'Round {len(self.tournament.rounds)}')
-        self.round_label = ttk.Label(self.window)
+        self.round_label = ttk.Label(self.window, textvariable=self.num_round)
         self.round_label.grid(row=0, column=0, padx=5, pady=5)
-        self.round_begin_button = ttk.Button(
-            self.window,
-            text='Commencer le round suivant',
-        )
-        self.round_begin_button.grid(row=1, column=0, padx=5, pady=5)
         self.round_save_button = ttk.Button(
             self.window,
             text='Enregistrer les résultats et terminer le round',
         )
-        self.round_save_button.grid(row=2, column=0, padx=5, pady=5)
+        self.round_save_button.grid(row=1, column=0, padx=5, pady=5)
+        # Create a list of variable for every match of a round
+        self.var_win = []
+        for i in range(len(self.tournament.players) // 2):
+            var_win = tk.StringVar(self.window)
+            self.var_win.append(var_win)
         self.display_ranking()
 
     def display_ranking(self):
@@ -59,6 +59,8 @@ class TournamentMenu():
             player_label.grid(row=player_index, column=0)
 
     def display_current_round(self):
+        for var_win in self.var_win:
+            var_win.set('None')
         if self.round_frame:
             self.round_frame.destroy()
         self.round_frame = ttk.Frame(self.window, borderwidth=2, relief=tk.GROOVE)
@@ -74,8 +76,24 @@ class TournamentMenu():
         round = self.tournament.rounds[-1]
         for match in round.matchs:
             match_index = round.matchs.index(match)
-            player1 = f'{match[0][0].first_name} {match[0][0].name}'
-            player2 = f'{match[1][0].first_name} {match[1][0].name}'
+            player1 = f'(1) {match[0][0].first_name} {match[0][0].name}'
+            player2 = f'(2) {match[1][0].first_name} {match[1][0].name}'
             match_title = f'{player1} vs {player2}'
             match_label = ttk.Label(self.round_frame, text=match_title)
             match_label.grid(row=match_index, column=0)
+            button_list = ['Victoire (1)', 'Victoire (2)', 'Match nul']
+            c = 1
+            for elem in button_list:
+                b = ttk.Radiobutton(
+                    self.round_frame,
+                    text=elem,
+                    variable=self.var_win[match_index],
+                    value=elem,
+                    )
+                b.grid(row=match_index, column=c)
+                c += 1
+
+    def end_tournament(self):
+        if self.round_frame:
+            self.round_frame.destroy()
+        self.num_round.set('Le tournoi est terminé!')
