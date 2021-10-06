@@ -1,3 +1,4 @@
+from tkinter.constants import DISABLED
 from view_main_menu import MainMenu
 from view_create_tournament import CreateTournament
 from view_create_player import CreatePlayer
@@ -133,8 +134,8 @@ class Controller():
     # Tournament menu
     def begin_tournament(self, tournament):
         self.v_tournament_menu = TournamentMenu(tournament)
-        self.v_tournament_menu.round_begin_button.config(command=self.begin_next_round)
         self.v_tournament_menu.round_save_button.config(command=self.save_round)
+        self.begin_next_round()
 
     # Tournament menu
     def begin_next_round(self):
@@ -143,12 +144,40 @@ class Controller():
         else:
             self.next_pairing()
         self.v_tournament_menu.num_round.set(f'Round {len(self.v_tournament_menu.tournament.rounds)}')
-        self.v_tournament_menu.round_label['text'] = self.v_tournament_menu.num_round.get()
+        # self.v_tournament_menu.round_label['text'] = self.v_tournament_menu.num_round.get()
         self.v_tournament_menu.display_current_round()
 
     # Tournament menu
     def save_round(self):
         round = self.v_tournament_menu.tournament.rounds[-1]
+        for match in round.matchs:
+            match_index = round.matchs.index(match)
+            resultat = self.v_tournament_menu.var_win[match_index].get()
+            if resultat == 'None':
+                showinfo("Tournoi", "Tous les résultats n'ont pas été saisis.")
+                return None
+        for match in round.matchs:
+            match_index = round.matchs.index(match)
+            resultat = self.v_tournament_menu.var_win[match_index].get()
+            if resultat == 'Victoire (1)':
+                match[0][1] = 1
+                match[1][1] = 0
+            elif resultat == 'Victoire (2)':
+                match[0][1] = 0
+                match[1][1] = 1
+            elif resultat == 'Match nul':
+                match[0][1] = 0.5
+                match[1][1] = 0.5
+            match[0][0].points += match[0][1]
+            match[1][0].points += match[1][1]
+        self.v_tournament_menu.display_ranking()
+        print(len(self.v_tournament_menu.tournament.rounds))
+        print(self.v_tournament_menu.tournament.nb_round)
+        if len(self.v_tournament_menu.tournament.rounds) == int(self.v_tournament_menu.tournament.nb_round):
+            self.v_tournament_menu.round_save_button.config(state=DISABLED)
+            self.v_tournament_menu.end_tournament()
+        else:
+            self.begin_next_round()
 
     # Tournament menu
     def check_pairing(self, pairing):
@@ -184,7 +213,7 @@ class Controller():
         players = sorted(players, key=lambda tri: tri.points, reverse=True)
         matchs = []
         ctrl = 0
-        while len(players) > 0 and ctrl < 100:
+        while len(players) > 0 and ctrl < 1000:
             ctrl += 1
             opponent = 1
             match_valid = False
