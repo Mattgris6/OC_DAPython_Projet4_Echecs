@@ -7,6 +7,7 @@ from tkinter import scrolledtext
 class CreateTournament():
     def __init__(self):
         self.tournament = None
+        self.players = []
         self.window = tk.Tk()
         w = 600  # width for the self.window
         h = 400  # height for the self.window
@@ -84,6 +85,34 @@ class CreateTournament():
             text="Joueurs par defaut",
             )
         self.button_player_default.place(relx=0.5, rely=0.80, anchor=tk.CENTER)
+
+    def display_players(self):
+        """Display player list in a frame, with button to remove a player"""
+        if self.player_frame:
+            self.player_frame.destroy()
+        self.player_frame = ttk.Frame(
+            self.window,
+            borderwidth=2,
+            relief=tk.GROOVE,
+            )
+        self.player_frame.place(relx=0.05, rely=0.35)
+        for player in self.players:
+            player_index = self.players.index(player)
+            player_title = f'{player.name} {player.first_name}'
+            player_label = ttk.Label(self.player_frame, text=player_title)
+            player_label.grid(row=player_index, column=0)
+            player_button = ttk.Button(
+                self.player_frame,
+                text='Désinscrire',
+                command=lambda: self.remove_player(player)
+                )
+            player_button.grid(row=player_index, column=1)
+
+    # Create tournament
+    def remove_player(self, player):
+        """Remove a player from the list"""
+        self.players.remove(player)
+        self.display_players()
 
     def cancel(self):
         self.tournament = None

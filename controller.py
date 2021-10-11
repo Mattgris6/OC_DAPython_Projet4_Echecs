@@ -8,7 +8,10 @@ from model import Tournament, Player, Round, joueurs
 
 from tkinter.messagebox import showinfo
 import tkinter as tk
-from tkinter import ttk
+
+import re
+
+from tinydb import TinyDB
 
 
 class Controller():
@@ -18,8 +21,10 @@ class Controller():
         self.v_create_tournament = None
         self.v_create_player = None
         self.v_tournament_menu = None
-        # Initialize other variable
-        self.players = []
+        # Initialize database
+        db = TinyDB('db.json')
+        self.players_table = db.table('players')
+        self.serialized_players = self.players_table.all()
         # Config the callback main menu
         self.v_main_menu.button_new_tournament.config(command=self.new_tournament)
         self.v_main_menu.button_historic.config(command=self.historic)
@@ -54,46 +59,29 @@ class Controller():
 
     # Create tournament
     def add_player(self):
-        if len(self.players) < 8:
+        if len(self.v_create_tournament.players) < 8:
             self.v_create_player = CreatePlayer()
             # Config the callback
             self.v_create_player.button_add.config(command=self.save_player)
+            self.v_create_player.button_add_base.config(command=self.add_base_player)
+            base_players = [
+                f"{p.get('name')} {p.get('first_name')} ({p.get('birthday')})" for p in self.serialized_players
+            ]
+            self.v_create_player.base_player.config(values=base_players)
             # Run and wait for the user input
             self.v_create_player.window.wait_window()
             if self.v_create_player.new_player:
-                self.players.append(self.v_create_player.new_player)
-            self.display_players()
+                ctrl_player = [
+                    f'{player.name}{player.first_name}{player.birthday}'
+                    for player in self.v_create_tournament.players
+                ]
+                new_player = self.v_create_player.new_player
+                str_new_player = f'{new_player.name}{new_player.first_name}{new_player.birthday}'
+                if str_new_player not in ctrl_player:
+                    self.v_create_tournament.players.append(self.v_create_player.new_player)
+            self.v_create_tournament.display_players()
         else:
             showinfo("Joueurs", "Il y a déjà 8 joueurs inscrits!")
-
-    # Create tournament
-    def display_players(self):
-        """Display player list in a frame, with button to remove a player"""
-        if self.v_create_tournament.player_frame:
-            self.v_create_tournament.player_frame.destroy()
-        self.v_create_tournament.player_frame = ttk.Frame(
-            self.v_create_tournament.window,
-            borderwidth=2,
-            relief=tk.GROOVE,
-            )
-        self.v_create_tournament.player_frame.place(relx=0.05, rely=0.35)
-        for player in self.players:
-            player_index = self.players.index(player)
-            player_title = f'{player.name} {player.first_name}'
-            player_label = ttk.Label(self.v_create_tournament.player_frame, text=player_title)
-            player_label.grid(row=player_index, column=0)
-            player_button = ttk.Button(
-                self.v_create_tournament.player_frame,
-                text='Désinscrire',
-                command=lambda: self.remove_player(player)
-                )
-            player_button.grid(row=player_index, column=1)
-
-    # Create tournament
-    def remove_player(self, player):
-        """Remove a player from the list"""
-        self.players.remove(player)
-        self.display_players()
 
     # Create tournament
     def play_tournament(self):
@@ -104,32 +92,86 @@ class Controller():
             self.v_create_tournament.time_system.get(),
             self.v_create_tournament.default_round.get()
             )
-        self.v_create_tournament.tournament.players = self.players
-        self.v_create_tournament.window.destroy()
+        if len(self.v_create_tournament.players) == self.v_create_tournament.tournament.NB_PLAYERS:
+            self.v_create_tournament.tournament.players = self.v_create_tournament.players
+            self.v_create_tournament.window.destroy()
+        else:
+            showinfo(
+                "Erreur",
+                f"Il n'y a pas le bon nombre de joueurs : {self.v_create_tournament.tournament.NB_PLAYERS} attendus."
+                )
 
     # Create tournament
     def joueurs_par_defaut(self):
         self.player = []
         for joueur in joueurs:
-            nouveau_joueur = Player(joueur[1],
-                            joueur[0],
-                            joueur[2],
-                            joueur[3],
-                            joueur[4]
-                            )
-            self.players.append(nouveau_joueur)
-        self.display_players()
+            nouveau_joueur = Player(joueur[1], joueur[0], joueur[2], joueur[3], joueur[4])
+            self.v_create_tournament.players.append(nouveau_joueur)
+        self.v_create_tournament.display_players()
 
     # Create player
     def save_player(self):
-        self.v_create_player.new_player = Player(
-            self.v_create_player.name.get(),
-            self.v_create_player.name2.get(),
-            self.v_create_player.birthday.get(),
-            self.v_create_player.radio_value.get(),
-            self.v_create_player.ranking.get(),
-            )
-        self.v_create_player.window.destroy()
+        if self.check_player():
+            self.v_create_player.new_player = Player(
+                self.v_create_player.name.get(),
+                self.v_create_player.name2.get(),
+                self.v_create_player.birthday.get(),
+                self.v_create_player.radio_value.get(),
+                self.v_create_player.ranking.get(),
+                )
+            self.v_create_player.window.destroy()
+            self.save_player_base(self.v_create_player.new_player)
+        else:
+            showinfo("Erreur", "Les informations renseignées ne sont pas correctes.")
+
+    # Create player
+    def check_player(self):
+        f_name = re.compile(r'[A-Za-z]{2,25}((\-|\s)[A-Za-z]{2,25})*')
+        f_date = re.compile('([12][0-9]|3[0-1]|0[1-9])([/])(1[0-2]|0?[1-9])([./-])(2?1?[0-9][0-9][0-9])')
+        f_ranking = re.compile('[0-9]*')
+        name_ok = re.fullmatch(f_name, self.v_create_player.name.get())
+        first_name_ok = re.fullmatch(f_name, self.v_create_player.name2.get())
+        birthday_ok = re.fullmatch(f_date, self.v_create_player.birthday.get())
+        ranking_ok = re.fullmatch(f_ranking, self.v_create_player.ranking.get())
+        if name_ok and first_name_ok and birthday_ok and ranking_ok:
+            return True
+        else:
+            return False
+
+    # Create player
+    def add_base_player(self):
+        player = self.serialized_players[self.v_create_player.base_player.current()]
+        self.v_create_player.name.delete(0, tk.END)
+        self.v_create_player.name.insert(0, player.get('name'))
+        self.v_create_player.name2.delete(0, tk.END)
+        self.v_create_player.name2.insert(0, player.get('first_name'))
+        self.v_create_player.birthday.delete(0, tk.END)
+        self.v_create_player.birthday.insert(0, player.get('birthday'))
+        self.v_create_player.ranking.delete(0, tk.END)
+        self.v_create_player.ranking.insert(0, player.get('ranking'))
+        self.v_create_player.radio_value.set(player.get('sex'))
+
+    def save_player_base(self, new_player):
+        # Check if the new player already in base
+        check_player = f'{new_player.name.lower()} {new_player.first_name.lower()} {new_player.birthday}'
+        check_players = []
+        for s_player in self.serialized_players:
+            s_p_check = f'{s_player["name"].lower()} {s_player["first_name"].lower()} {s_player["birthday"]}'
+            check_players.append(s_p_check)
+        if check_player not in check_players:
+            player = {
+                'name': new_player.name,
+                'first_name': new_player.first_name,
+                'birthday': new_player.birthday,
+                'sex': new_player.sex,
+                'ranking': new_player.ranking,
+            }
+            self.serialized_players.append(player)
+        self.save_base()
+
+    def save_base(self):
+        self.players_table.truncate()
+        self.players_table.insert_multiple(self.serialized_players)
 
     # Tournament menu
     def begin_tournament(self, tournament):
