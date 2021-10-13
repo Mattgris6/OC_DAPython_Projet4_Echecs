@@ -104,7 +104,7 @@ class CreateTournament():
             player_button = ttk.Button(
                 self.player_frame,
                 text='Désinscrire',
-                command=lambda: self.remove_player(player)
+                command=lambda player=player: self.remove_player(player),
                 )
             player_button.grid(row=player_index, column=1)
 
