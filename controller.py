@@ -8,7 +8,7 @@ from model import Tournament, Player, Round, joueurs
 
 from tkinter.messagebox import showinfo
 import tkinter as tk
-from tkinter.constants import DISABLED
+from tkinter.constants import ACTIVE, DISABLED
 
 import re
 from tinydb import TinyDB
@@ -23,6 +23,8 @@ class Controller():
         self.v_create_player = None
         self.v_tournament_menu = None
         self.v_players = None
+        # Others initialization
+        self.display_type = None
         # Initialize database
         db = TinyDB('db.json')
         self.players_table = db.table('players')
@@ -47,6 +49,19 @@ class Controller():
                 self.serialized_players.index(player) + 1,
             )
             players.append(i_player)
+        return players
+
+    @property
+    def alphabetic_order(self):
+        players = sorted(
+            sorted(self.instanced_players, key=lambda tri: tri.first_name),
+            key=lambda tri: tri.name
+            )
+        return players
+
+    @property
+    def ranking_order(self):
+        players = sorted(self.instanced_players, key=lambda tri: tri.ranking, reverse=True)
         return players
 
     # Main menu
@@ -76,28 +91,47 @@ class Controller():
         self.v_players = ViewPlayer(self.instanced_players)
         self.v_players.b_order_name.config(command=self.display_alphabetic)
         self.v_players.b_order_rank.config(command=self.display_ranking)
+        self.v_players.b_show.config(command=self.display_player)
+        self.v_players.b_save.config(command=self.save_changes)
         self.display_ranking()
+
+    def display_player(self):
+        selected = self.v_players.player_list.curselection()
+        selected_id = self.v_players.player_list.curselection()[0]
+        if selected:
+            if self.display_type == 'alphabetic':
+                player = self.alphabetic_order[selected_id]
+            elif self.display_type == 'ranking':
+                player = self.ranking_order[selected_id]
+        self.v_players.display_player_info(player)
 
     def display_alphabetic(self):
         self.v_players.player_list.delete(0, tk.END)
-        players = sorted(
-            sorted(self.instanced_players, key=lambda tri: tri.first_name),
-            key=lambda tri: tri.name
-            )
-        for player in players:
+        for player in self.alphabetic_order:
             self.v_players.player_list.insert(
                 'end',
                 f'{player.name} {player.first_name} ({player.ranking})'
                 )
+        self.display_type = 'alphabetic'
 
     def display_ranking(self):
         self.v_players.player_list.delete(0, tk.END)
-        players = sorted(self.instanced_players, key=lambda tri: tri.ranking, reverse=True)
-        for player in players:
+        for player in self.ranking_order:
             self.v_players.player_list.insert(
                 'end',
                 f'{player.name} {player.first_name} ({player.ranking})'
                 )
+        self.display_type = 'ranking'
+
+    def save_changes(self):
+        if self.v_players.id.cget("text") != '':
+            id = int(self.v_players.id.cget("text")) - 1
+            self.serialized_players[id]['name'] = self.v_players.name.get()
+            self.serialized_players[id]['first_name'] = self.v_players.first_name.get()
+            self.serialized_players[id]['birthday'] = self.v_players.birthday.get()
+            self.serialized_players[id]['ranking'] = int(self.v_players.ranking.get())
+            self.serialized_players[id]['sex'] = self.v_players.radio_value.get()
+            self.save_base_player()
 
     # Main menu
     def run(self):
@@ -167,7 +201,7 @@ class Controller():
                 self.v_create_player.radio_value.get(),
                 int(self.v_create_player.ranking.get()),
                 )
-            self.save_player_base(self.v_create_player.new_player)
+            self.save_player(self.v_create_player.new_player)
             self.v_create_player.window.destroy()
         else:
             showinfo("Erreur", "Les informations renseignées ne sont pas correctes.")
@@ -199,7 +233,7 @@ class Controller():
         self.v_create_player.ranking.insert(0, player.get('ranking'))
         self.v_create_player.radio_value.set(player.get('sex'))
 
-    def save_player_base(self, new_player):
+    def save_player(self, new_player):
         # Check if the new player already in base
         check_player = f'{new_player.name.lower()} {new_player.first_name.lower()} {new_player.birthday}'
         check_players = []
