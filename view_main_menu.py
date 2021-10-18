@@ -43,7 +43,7 @@ class MainMenu():
             text="Fermer",
             command=self.window.destroy,
             )
-        self.button_quit.place(relx=0.9, rely=0.9, anchor=tk.CENTER)
+        self.button_quit.place(relx=0.8, rely=0.9, anchor=tk.CENTER)
         # Insert an image of chess
         main_path = os.path.abspath(os.path.dirname(__file__))
         image_file = main_path + r'/Ressources/image_menu.png'
