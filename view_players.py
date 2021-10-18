@@ -3,9 +3,8 @@ from tkinter import ttk
 
 
 class ViewPlayer():
-    def __init__(self, players):
+    def __init__(self):
         self.window = tk.Tk()
-        self.players = players
         w = 800  # width for the self.window
         h = 300  # height for the self.window
         # get screen width and height
@@ -18,7 +17,6 @@ class ViewPlayer():
         self.window.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.window.resizable(False, False)
         # Get player infos
-        self.new_player = None
         self.label_id = ttk.Label(self.window, text="id en base : ")
         self.label_id.grid(row=0, column=3, padx=5, pady=5)
         self.id = ttk.Label(self.window, text="")
@@ -93,7 +91,6 @@ class ViewPlayer():
         self.button_quit.grid(row=8, column=2, padx=5, pady=5)
 
     def cancel(self):
-        self.new_player = None
         self.window.destroy()
 
     def display_player_info(self, player):

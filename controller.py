@@ -8,11 +8,13 @@ from model import Tournament, Player, Round, joueurs
 
 from tkinter.messagebox import showinfo
 import tkinter as tk
-from tkinter.constants import ACTIVE, DISABLED
+from tkinter.constants import DISABLED
 
 import re
 from tinydb import TinyDB
 from datetime import datetime
+
+from view_tournaments import ViewTournaments
 
 
 class Controller():
@@ -23,6 +25,7 @@ class Controller():
         self.v_create_player = None
         self.v_tournament_menu = None
         self.v_players = None
+        self.v_tournaments = None
         # Others initialization
         self.display_type = None
         # Initialize database
@@ -38,6 +41,7 @@ class Controller():
 
     @property
     def instanced_players(self):
+        """Players in base as instance"""
         players = []
         for player in self.serialized_players:
             i_player = Player(
@@ -53,6 +57,7 @@ class Controller():
 
     @property
     def alphabetic_order(self):
+        """Players in base as instance ordered by alphabetic"""
         players = sorted(
             sorted(self.instanced_players, key=lambda tri: tri.first_name),
             key=lambda tri: tri.name
@@ -61,6 +66,7 @@ class Controller():
 
     @property
     def ranking_order(self):
+        """Players in base as instance ordered by ranking"""
         players = sorted(self.instanced_players, key=lambda tri: tri.ranking, reverse=True)
         return players
 
@@ -83,12 +89,12 @@ class Controller():
     # Main menu
     def historic(self):
         """Show the page of Historic"""
-        showinfo("Historique", "Historique!")
+        self.v_tournaments = ViewTournaments()
 
     # Main menu
     def show_players(self):
         """Show all players in base"""
-        self.v_players = ViewPlayer(self.instanced_players)
+        self.v_players = ViewPlayer()
         self.v_players.b_order_name.config(command=self.display_alphabetic)
         self.v_players.b_order_rank.config(command=self.display_ranking)
         self.v_players.b_show.config(command=self.display_player)
@@ -96,6 +102,7 @@ class Controller():
         self.display_ranking()
 
     def display_player(self):
+        """Call back to display info of the selected player"""
         selected = self.v_players.player_list.curselection()
         selected_id = self.v_players.player_list.curselection()[0]
         if selected:
@@ -106,6 +113,7 @@ class Controller():
         self.v_players.display_player_info(player)
 
     def display_alphabetic(self):
+        """Order the listbox  by alphabetic"""
         self.v_players.player_list.delete(0, tk.END)
         for player in self.alphabetic_order:
             self.v_players.player_list.insert(
@@ -115,6 +123,7 @@ class Controller():
         self.display_type = 'alphabetic'
 
     def display_ranking(self):
+        """Order the listbox by ranking"""
         self.v_players.player_list.delete(0, tk.END)
         for player in self.ranking_order:
             self.v_players.player_list.insert(
@@ -124,6 +133,7 @@ class Controller():
         self.display_type = 'ranking'
 
     def save_changes(self):
+        """Save the changes of selected player"""
         if self.v_players.id.cget("text") != '':
             id = int(self.v_players.id.cget("text")) - 1
             self.serialized_players[id]['name'] = self.v_players.name.get()
@@ -140,10 +150,11 @@ class Controller():
 
     # Create tournament
     def add_player(self):
+        """Add a player to the tournament"""
         if len(self.v_create_tournament.players) < 8:
             self.v_create_player = CreatePlayer()
             # Config the callback
-            self.v_create_player.button_add.config(command=self.save_player)
+            self.v_create_player.button_add.config(command=self.sign_player)
             self.v_create_player.button_add_base.config(command=self.add_base_player)
             base_players = [
                 f"{p.get('name')} {p.get('first_name')} ({p.get('birthday')})" for p in self.serialized_players
@@ -192,7 +203,8 @@ class Controller():
         self.v_create_tournament.display_players()
 
     # Create player
-    def save_player(self):
+    def sign_player(self):
+        """Create a new instance and sign up the player for the tournament"""
         if self.check_player():
             self.v_create_player.new_player = Player(
                 self.v_create_player.name.get(),
@@ -208,6 +220,7 @@ class Controller():
 
     # Create player
     def check_player(self):
+        """Check the recorded info"""
         f_name = re.compile(r'[A-Za-z]{2,25}((\-|\s)[A-Za-z]{2,25})*')
         f_date = re.compile('([12][0-9]|3[0-1]|0[1-9])([/])(1[0-2]|0?[1-9])([./-])(2?1?[0-9][0-9][0-9])')
         f_ranking = re.compile('[0-9]*')
@@ -222,6 +235,7 @@ class Controller():
 
     # Create player
     def add_base_player(self):
+        """Fill the entries with info of the selected player"""
         player = self.serialized_players[self.v_create_player.base_player.current()]
         self.v_create_player.name.delete(0, tk.END)
         self.v_create_player.name.insert(0, player.get('name'))
@@ -234,6 +248,7 @@ class Controller():
         self.v_create_player.radio_value.set(player.get('sex'))
 
     def save_player(self, new_player):
+        """Add player in base"""
         # Check if the new player already in base
         check_player = f'{new_player.name.lower()} {new_player.first_name.lower()} {new_player.birthday}'
         check_players = []
@@ -246,10 +261,12 @@ class Controller():
         self.save_base_player()
 
     def save_base_player(self):
+        """Save the player table in base"""
         self.players_table.truncate()
         self.players_table.insert_multiple(self.serialized_players)
 
     def save_base_tournament(self):
+        """Save the tournament table in base"""
         self.tournament_table.truncate()
         self.tournament_table.insert_multiple(self.serialized_tournament)
 
