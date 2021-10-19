@@ -5,7 +5,7 @@ from view_players import ViewPlayer
 from view_tournament_menu import TournamentMenu
 from view_tournaments import ViewTournaments
 
-from model import Tournament, Player, Round, joueurs
+from model import Tournament, Player, Round
 
 from tkinter.messagebox import showinfo
 import tkinter as tk
@@ -116,7 +116,6 @@ class Controller():
         # Config the callback create tournament
         self.v_create_tournament.button_player.config(command=self.add_player)
         self.v_create_tournament.button_play.config(command=self.play_tournament)
-        self.v_create_tournament.button_player_default.config(command=self.joueurs_par_defaut)
         self.v_create_tournament.window.wait_window()
         if self.v_create_tournament.tournament:
             s_tournament = self.v_create_tournament.tournament.serial_tournament
@@ -237,7 +236,7 @@ class Controller():
             self.v_create_tournament.location.get(),
             self.v_create_tournament.time_system.get(),
             self.v_create_tournament.default_round.get(),
-            self.v_create_tournament.describe.get(),
+            self.v_create_tournament.describe.get("1.0", tk.END),
             )
         if len(self.v_create_tournament.players) == self.v_create_tournament.tournament.NB_PLAYERS:
             self.v_create_tournament.tournament.players = self.v_create_tournament.players
@@ -247,15 +246,6 @@ class Controller():
                 "Erreur",
                 f"Il n'y a pas le bon nombre de joueurs : {self.v_create_tournament.tournament.NB_PLAYERS} attendus."
                 )
-
-    # Create tournament
-    def joueurs_par_defaut(self):
-        self.player = []
-        for joueur in joueurs:
-            nouveau_joueur = Player(joueur[1], joueur[0], joueur[2], joueur[3], joueur[4])
-            nouveau_joueur.index = self.serialized_players.index(nouveau_joueur.serial_player) + 1
-            self.v_create_tournament.players.append(nouveau_joueur)
-        self.v_create_tournament.display_players()
 
     # Create player
     def sign_player(self):

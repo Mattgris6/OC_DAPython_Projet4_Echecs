@@ -79,12 +79,6 @@ class CreateTournament():
             command=self.cancel,
             )
         self.button_quit.place(relx=0.92, rely=0.93, anchor=tk.CENTER)
-        # Default players
-        self.button_player_default = ttk.Button(
-            self.window,
-            text="Joueurs par defaut",
-            )
-        self.button_player_default.place(relx=0.5, rely=0.80, anchor=tk.CENTER)
 
     def display_players(self):
         """Display player list in a frame, with button to remove a player"""

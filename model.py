@@ -2,15 +2,6 @@ from datetime import datetime
 from typing import List
 from copy import deepcopy
 
-joueurs = [['Matthieu', 'Grison', '20/12/1992', 'Homme', 6],
-            ['Pierre', 'Grison', '16/11/1994', 'Homme', 7],
-            ['Joseph', 'Grison', '10/04/1985', 'Homme', 2],
-            ['Jean-Baptiste', 'Grison', '04/06/1983', 'Homme', 1],
-            ['Jeanne', 'Grison', '22/06/1991', 'Femme', 5],
-            ['Blandine', 'Grison', '18/09/1988', 'Femme', 4],
-            ['Helene', 'Grison', '11/03/1987','Femme', 3],
-            ['Catherine', 'Grison', '13/12/1956', 'Femme', 8]]
-
 
 class Player():
     def __init__(self, name, first_name, birthday, sex, ranking=0, index=0):
@@ -62,7 +53,7 @@ class Tournament():
     def serial_tournament(self):
         s_tournament = {
             'name': self.name,
-            'locaion': self.location,
+            'location': self.location,
             'date_tournament': self.date_tournament,
             'time_system': self.time_system,
             'nb_round': self.nb_round,
