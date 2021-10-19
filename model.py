@@ -33,6 +33,18 @@ class Player():
             }
         return s_player
 
+    def set_points(self, tournament):
+        self.points = 0
+        for round in tournament.rounds:
+            for match in round.matchs:
+                if match[0][0].index == self.index:
+                    self.points += match[0][1]
+                    break
+                elif match[1][0].index == self.index:
+                    self.points += match[1][1]
+                    break
+        return self.points
+
 class Tournament():
     NB_PLAYERS = 8
     def __init__(self, name, location, time_system='bullet', nb_round=4, description='', index=0):
@@ -70,14 +82,10 @@ class Round():
 
     @property
     def serial_round(self):
-        print(self.name, self.matchs)
         new_matchs = deepcopy(self.matchs)
-        print('Nouvelle liste : ', new_matchs)
         for new_match in new_matchs:
             new_match[0][0] = new_match[0][0].index
             new_match[1][0] = new_match[1][0].index
-        print(self.name, self.matchs)
-        print('Nouvelle liste : ', new_matchs)
         s_round = {
             'name': self.name,
             'date_begin': self.date_begin,

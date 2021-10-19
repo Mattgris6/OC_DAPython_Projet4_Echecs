@@ -3,6 +3,7 @@ from view_create_tournament import CreateTournament
 from view_create_player import CreatePlayer
 from view_players import ViewPlayer
 from view_tournament_menu import TournamentMenu
+from view_tournaments import ViewTournaments
 
 from model import Tournament, Player, Round, joueurs
 
@@ -13,8 +14,6 @@ from tkinter.constants import DISABLED
 import re
 from tinydb import TinyDB
 from datetime import datetime
-
-from view_tournaments import ViewTournaments
 
 
 class Controller():
@@ -27,7 +26,8 @@ class Controller():
         self.v_players = None
         self.v_tournaments = None
         # Others initialization
-        self.display_type = None
+        self.p_display_type = None
+        self.t_display_type = None
         # Initialize database
         db = TinyDB('db.json')
         self.players_table = db.table('players')
@@ -56,7 +56,7 @@ class Controller():
         return players
 
     @property
-    def alphabetic_order(self):
+    def alphabetic_order_players(self):
         """Players in base as instance ordered by alphabetic"""
         players = sorted(
             sorted(self.instanced_players, key=lambda tri: tri.first_name),
@@ -65,10 +65,49 @@ class Controller():
         return players
 
     @property
-    def ranking_order(self):
+    def ranking_order_players(self):
         """Players in base as instance ordered by ranking"""
         players = sorted(self.instanced_players, key=lambda tri: tri.ranking, reverse=True)
         return players
+
+    @property
+    def instanced_tournaments(self):
+        """Tournaments in base as instance"""
+        tournaments = []
+        for tournament in self.serialized_tournament:
+            i_tournament = Tournament(
+                tournament.get('name'),
+                tournament.get('location'),
+                tournament.get('time_system'),
+                tournament.get('nb_round'),
+                tournament.get('description'),
+                self.serialized_tournament.index(tournament),
+            )
+            i_tournament.players = [self.instanced_players[player - 1] for player in tournament.get('players')]
+            i_tournament.rounds = [self.instanced_round(round) for round in tournament.get('rounds')]
+            tournaments.append(i_tournament)
+        return tournaments
+
+    @property
+    def date_order_tournaments(self):
+        tournaments = sorted(self.instanced_tournaments, key=lambda tri: tri.date_tournament)
+        return tournaments
+
+    @property
+    def name_order_tournaments(self):
+        tournaments = sorted(self.instanced_tournaments, key=lambda tri: tri.name)
+        return tournaments
+
+    def instanced_round(self, round):
+        i_round = Round(round.get('name'))
+        i_round.date_begin = round.get('date_begin')
+        i_round.date_end = round.get('date_end')
+        i_round.matchs = round.get('matchs')
+        for match in i_round.matchs:
+            if isinstance(match[0][0], int):
+                match[0][0] = self.instanced_players[match[0][0] - 1]
+                match[1][0] = self.instanced_players[match[1][0] - 1]
+        return i_round
 
     # Main menu
     def new_tournament(self):
@@ -90,6 +129,31 @@ class Controller():
     def historic(self):
         """Show the page of Historic"""
         self.v_tournaments = ViewTournaments()
+        self.v_tournaments.b_order_name.config(command=self.t_display_name)
+        self.v_tournaments.b_order_date.config(command=self.t_display_date)
+        self.v_tournaments.b_show.config(command=self.display_tournament)
+        self.t_display_date()
+
+    def display_tournament(self):
+        """Call back to display info of the selected tournament"""
+        selected = self.v_tournaments.tournament_list.curselection()
+        selected_id = self.v_tournaments.tournament_list.curselection()[0]
+        if selected:
+            if self.t_display_type == 'date':
+                tournament = self.date_order_tournaments[selected_id]
+            elif self.t_display_type == 'name':
+                tournament = self.name_order_tournaments[selected_id]
+        self.v_tournaments.display_tournament_info(tournament)
+
+    def t_display_date(self):
+        """Order the listbox by date"""
+        self.v_tournaments.display_list(self.date_order_tournaments)
+        self.t_display_type = 'date'
+
+    def t_display_name(self):
+        """Order the listbox by ranking"""
+        self.v_tournaments.display_list(self.name_order_tournaments)
+        self.t_display_type = 'name'
 
     # Main menu
     def show_players(self):
@@ -106,31 +170,21 @@ class Controller():
         selected = self.v_players.player_list.curselection()
         selected_id = self.v_players.player_list.curselection()[0]
         if selected:
-            if self.display_type == 'alphabetic':
-                player = self.alphabetic_order[selected_id]
-            elif self.display_type == 'ranking':
-                player = self.ranking_order[selected_id]
+            if self.p_display_type == 'alphabetic':
+                player = self.alphabetic_order_players[selected_id]
+            elif self.p_display_type == 'ranking':
+                player = self.ranking_order_players[selected_id]
         self.v_players.display_player_info(player)
 
     def display_alphabetic(self):
         """Order the listbox  by alphabetic"""
-        self.v_players.player_list.delete(0, tk.END)
-        for player in self.alphabetic_order:
-            self.v_players.player_list.insert(
-                'end',
-                f'{player.name} {player.first_name} ({player.ranking})'
-                )
-        self.display_type = 'alphabetic'
+        self.v_players.display_list(self.alphabetic_order_players)
+        self.p_display_type = 'alphabetic'
 
     def display_ranking(self):
         """Order the listbox by ranking"""
-        self.v_players.player_list.delete(0, tk.END)
-        for player in self.ranking_order:
-            self.v_players.player_list.insert(
-                'end',
-                f'{player.name} {player.first_name} ({player.ranking})'
-                )
-        self.display_type = 'ranking'
+        self.v_players.display_list(self.ranking_order_players)
+        self.p_display_type = 'ranking'
 
     def save_changes(self):
         """Save the changes of selected player"""
@@ -182,7 +236,8 @@ class Controller():
             self.v_create_tournament.name.get(),
             self.v_create_tournament.location.get(),
             self.v_create_tournament.time_system.get(),
-            self.v_create_tournament.default_round.get()
+            self.v_create_tournament.default_round.get(),
+            self.v_create_tournament.describe.get(),
             )
         if len(self.v_create_tournament.players) == self.v_create_tournament.tournament.NB_PLAYERS:
             self.v_create_tournament.tournament.players = self.v_create_tournament.players

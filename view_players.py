@@ -104,3 +104,12 @@ class ViewPlayer():
         self.ranking.delete(0, tk.END)
         self.ranking.insert(0, player.ranking)
         self.radio_value.set(player.sex)
+
+    def display_list(self, list_players):
+        """Order the listbox  by alphabetic"""
+        self.player_list.delete(0, tk.END)
+        for player in list_players:
+            self.player_list.insert(
+                'end',
+                f'{player.name} {player.first_name} ({player.ranking})'
+                )
