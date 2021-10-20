@@ -2,6 +2,7 @@ from view_main_menu import MainMenu
 from view_create_tournament import CreateTournament
 from view_create_player import CreatePlayer
 from view_players import ViewPlayer
+from view_rounds import ViewRounds
 from view_tournament_menu import TournamentMenu
 from view_tournaments import ViewTournaments
 
@@ -25,6 +26,7 @@ class Controller():
         self.v_tournament_menu = None
         self.v_players = None
         self.v_tournaments = None
+        self.v_rounds = None
         # Others initialization
         self.p_display_type = None
         self.t_display_type = None
@@ -83,6 +85,7 @@ class Controller():
                 tournament.get('description'),
                 self.serialized_tournament.index(tournament),
             )
+            i_tournament.date_tournament = tournament.get('date_tournament')
             i_tournament.players = [self.instanced_players[player - 1] for player in tournament.get('players')]
             i_tournament.rounds = [self.instanced_round(round) for round in tournament.get('rounds')]
             tournaments.append(i_tournament)
@@ -131,6 +134,7 @@ class Controller():
         self.v_tournaments.b_order_name.config(command=self.t_display_name)
         self.v_tournaments.b_order_date.config(command=self.t_display_date)
         self.v_tournaments.b_show.config(command=self.display_tournament)
+        self.v_tournaments.b_show_round.config(command=self.display_rounds)
         self.t_display_date()
 
     def display_tournament(self):
@@ -153,6 +157,14 @@ class Controller():
         """Order the listbox by ranking"""
         self.v_tournaments.display_list(self.name_order_tournaments)
         self.t_display_type = 'name'
+
+    def display_rounds(self):
+        """Display the rounds of the selected tournament"""
+        id = self.v_tournaments.id.cget("text")
+        if id != "":
+            tournament = self.instanced_tournaments[id]
+            self.v_rounds = ViewRounds()
+            self.v_rounds.display_rounds(tournament)
 
     # Main menu
     def show_players(self):
