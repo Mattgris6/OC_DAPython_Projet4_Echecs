@@ -5,8 +5,8 @@ from tkinter import ttk
 class ViewTournaments():
     def __init__(self):
         self.window = tk.Tk()
-        w = 800  # width for the self.window
-        h = 250  # height for the self.window
+        w = 1000  # width for the self.window
+        h = 300  # height for the self.window
         # get screen width and height
         ws = self.window.winfo_screenwidth()  # width of the screen
         hs = self.window.winfo_screenheight()  # height of the screen
@@ -79,6 +79,27 @@ class ViewTournaments():
             state=tk.DISABLED,
             )
         self.b_show_round.grid(row=8, column=4, padx=5, pady=5)
+        # To order by points
+        self.b_order_points = ttk.Button(
+            self.window,
+            text="par points",
+            state=tk.DISABLED,
+            )
+        self.b_order_points.grid(row=2, column=6, padx=5, pady=5, sticky="W")
+        # To order by ranking
+        self.b_order_rank = ttk.Button(
+            self.window,
+            text="par classement ELO",
+            state=tk.DISABLED,
+            )
+        self.b_order_rank.grid(row=3, column=6, padx=5, pady=5, sticky="W")
+        # To order by name
+        self.b_order_pname = ttk.Button(
+            self.window,
+            text="par nom",
+            state=tk.DISABLED,
+            )
+        self.b_order_pname.grid(row=4, column=6, padx=5, pady=5, sticky="W")
         # Quit window
         self.button_quit = ttk.Button(
             self.window,
@@ -97,7 +118,30 @@ class ViewTournaments():
         self.location.config(text=tournament.location)
         self.time_system.config(text=tournament.time_system)
         self.round.config(text=tournament.nb_round)
-        self.describe.config(text=tournament.description)
+        description = tournament.description.split('\n')[0]
+        if len(description) > 20:
+            description = description[:20] + '...'
+        self.describe.config(text=description)
+        # Display the players
+        players = sorted(tournament.players, key=lambda tri: tri.ranking, reverse=True)
+        players = sorted(players, key=lambda tri: tri.set_points(tournament), reverse=True)
+        self.order_player_frame(tournament, players)
+        # Enable the buttons
+        self.b_show_round.config(state=tk.ACTIVE)
+        self.b_order_points.config(state=tk.ACTIVE)
+        self.b_order_rank.config(state=tk.ACTIVE)
+        self.b_order_pname.config(state=tk.ACTIVE)
+
+    def display_list(self, list_tournamnents):
+        """Order the listbox by date"""
+        self.tournament_list.delete(0, tk.END)
+        for tournament in list_tournamnents:
+            self.tournament_list.insert(
+                'end',
+                f'{tournament.name} ({tournament.date_tournament})'
+                )
+
+    def order_player_frame(self, tournament, players):
         if self.player_frame:
             self.player_frame.destroy()
         self.player_frame = ttk.Frame(self.window, borderwidth=2, relief=tk.GROOVE)
@@ -109,22 +153,8 @@ class ViewTournaments():
             padx=5,
             pady=5,
             )
-        players = sorted(tournament.players, key=lambda tri: tri.ranking, reverse=True)
-        players = sorted(players, key=lambda tri: tri.set_points(tournament), reverse=True)
         for player in players:
             player_index = players.index(player)
             player_title = f'{player.name} {player.first_name} : {player.set_points(tournament)}pts'
             player_label = ttk.Label(self.player_frame, text=player_title)
             player_label.grid(row=player_index, column=0)
-        # Enable the button to show rounds
-        self.b_show_round.config(state=tk.ACTIVE)
-
-    def display_list(self, list_tournamnents):
-        """Order the listbox by date"""
-        self.tournament_list.delete(0, tk.END)
-        for tournament in list_tournamnents:
-            self.tournament_list.insert(
-                'end',
-                f'{tournament.name} ({tournament.date_tournament})'
-                )
-        

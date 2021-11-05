@@ -102,6 +102,7 @@ class Controller():
         return tournaments
 
     def instanced_round(self, round):
+        """To instance a round dictionnary"""
         i_round = Round(round.get('name'))
         i_round.date_begin = round.get('date_begin')
         i_round.date_end = round.get('date_end')
@@ -112,7 +113,7 @@ class Controller():
                 match[1][0] = self.instanced_players[match[1][0] - 1]
         return i_round
 
-    # Main menu
+    # Main menu (new tournment)
     def new_tournament(self):
         """Run the page to create a new tournament"""
         self.v_create_tournament = CreateTournament()
@@ -127,7 +128,7 @@ class Controller():
             self.save_base_tournament()
             self.begin_tournament(self.v_create_tournament.tournament)
 
-    # Main menu
+    # Main menu (historic)
     def historic(self):
         """Show the page of Historic"""
         self.v_tournaments = ViewTournaments()
@@ -135,6 +136,9 @@ class Controller():
         self.v_tournaments.b_order_date.config(command=self.t_display_date)
         self.v_tournaments.b_show.config(command=self.display_tournament)
         self.v_tournaments.b_show_round.config(command=self.display_rounds)
+        self.v_tournaments.b_order_pname.config(command=self.order_player_name)
+        self.v_tournaments.b_order_points.config(command=self.order_player_points)
+        self.v_tournaments.b_order_rank.config(command=self.order_player_rank)
         self.t_display_date()
 
     def display_tournament(self):
@@ -154,7 +158,7 @@ class Controller():
         self.t_display_type = 'date'
 
     def t_display_name(self):
-        """Order the listbox by ranking"""
+        """Order the listbox by name"""
         self.v_tournaments.display_list(self.name_order_tournaments)
         self.t_display_type = 'name'
 
@@ -165,6 +169,32 @@ class Controller():
             tournament = self.instanced_tournaments[id]
             self.v_rounds = ViewRounds()
             self.v_rounds.display_rounds(tournament)
+
+    def order_player_name(self):
+        """Order the players of the selected tournament by name"""
+        id = self.v_tournaments.id.cget("text")
+        if id != "":
+            tournament = self.instanced_tournaments[id]
+            players = sorted(tournament.players, key=lambda tri: tri.first_name)
+            players = sorted(players, key=lambda tri: tri.name)
+            self.v_tournaments.order_player_frame(tournament, players)
+
+    def order_player_points(self):
+        """Order the players of the selected tournament by points"""
+        id = self.v_tournaments.id.cget("text")
+        if id != "":
+            tournament = self.instanced_tournaments[id]
+            players = sorted(tournament.players, key=lambda tri: tri.ranking, reverse=True)
+            players = sorted(players, key=lambda tri: tri.set_points(tournament), reverse=True)
+            self.v_tournaments.order_player_frame(tournament, players)
+
+    def order_player_rank(self):
+        """Order players of the selected tournament by rank"""
+        id = self.v_tournaments.id.cget("text")
+        if id != "":
+            tournament = self.instanced_tournaments[id]
+            players = sorted(tournament.players, key=lambda tri: tri.ranking, reverse=True)
+            self.v_tournaments.order_player_frame(tournament, players)
 
     # Main menu
     def show_players(self):
@@ -329,12 +359,14 @@ class Controller():
 
     # Tournament menu
     def begin_tournament(self, tournament):
+        """Start a new tournament"""
         self.v_tournament_menu = TournamentMenu(tournament)
         self.v_tournament_menu.round_save_button.config(command=self.save_round)
         self.begin_next_round()
 
     # Tournament menu
     def begin_next_round(self):
+        """Begin a new round"""
         if len(self.v_tournament_menu.tournament.rounds) == 0:
             self.first_pairing()
         else:
@@ -344,6 +376,7 @@ class Controller():
 
     # Tournament menu
     def save_round(self):
+        """Save the results of a round"""
         round = self.v_tournament_menu.tournament.rounds[-1]
         for match in round.matchs:
             match_index = round.matchs.index(match)
@@ -378,6 +411,7 @@ class Controller():
 
     # Tournament menu
     def check_pairing(self, pairing):
+        """Check if the pair has not already been done"""
         for round in self.v_tournament_menu.tournament.rounds:
             for match in round.matchs:
                 if pairing == (match[0][0], match[1][0]) or pairing == (match[1][0], match[0][0]):
@@ -386,6 +420,7 @@ class Controller():
 
     # Tournament menu
     def first_pairing(self):
+        """Make the pairs for the first round"""
         players = sorted(
             self.v_tournament_menu.tournament.players,
             key=lambda tri: tri.ranking,
@@ -402,6 +437,7 @@ class Controller():
 
     # Tournament menu
     def next_pairing(self):
+        """Make the pairs for the next rounds"""
         players = sorted(
             self.v_tournament_menu.tournament.players,
             key=lambda tri: tri.ranking,
