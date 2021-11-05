@@ -15,7 +15,7 @@ Vous pouvez créer un nouveau tournoi : une nouvelle fenêtre avec un formulaire
 Une fois les infos remplies, vous pouvez lancer le tournoi.
 Une nouvelle fenêtre s'ouvre permettant de gérer les résultats des rounds du tournoi, avec une vision sur le classement.
 
-Depuis le menu principal, vous pouvez accéder à l'historique des tournoi.
+Depuis le menu principal, vous pouvez accéder à l'historique des tournois.
 
 Depuis le menu principal, vous pouvez accéder à la liste de tous les joueurs en base.
 C'est là que vous allez pouvoir modifier les informations d'un joueur, et notamment son classement en fonction de ses résultats.
