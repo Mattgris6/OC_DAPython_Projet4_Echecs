@@ -6,7 +6,7 @@ from view.view_rounds import ViewRounds
 from view.view_tournament_menu import TournamentMenu
 from view.view_tournaments import ViewTournaments
 
-from model import Tournament, Player, Round
+from model.model import Tournament, Player, Round
 
 from tkinter.messagebox import showinfo
 import tkinter as tk
@@ -112,6 +112,11 @@ class Controller():
                 match[0][0] = self.instanced_players[match[0][0] - 1]
                 match[1][0] = self.instanced_players[match[1][0] - 1]
         return i_round
+
+    # Main menu
+    def run(self):
+        """Show the home page"""
+        self.v_main_menu.window.mainloop()
 
     # Main menu (new tournment)
     def new_tournament(self):
@@ -237,11 +242,6 @@ class Controller():
             self.serialized_players[id]['ranking'] = int(self.v_players.ranking.get())
             self.serialized_players[id]['sex'] = self.v_players.radio_value.get()
             self.save_base_player()
-
-    # Main menu
-    def run(self):
-        """Show the home page"""
-        self.v_main_menu.window.mainloop()
 
     # Create tournament
     def add_player(self):
@@ -481,7 +481,3 @@ class Controller():
         new_round = Round("Round " + str(len(self.v_tournament_menu.tournament.rounds) + 1))
         new_round.matchs = matchs
         self.v_tournament_menu.tournament.rounds.append(new_round)
-
-
-app = Controller()
-app.run()

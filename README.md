@@ -25,7 +25,7 @@ pip install -r requirements.txt
 Ensuite, vous pouvez lancer le programme avec :
 
 ```sh
-python controller.py
+python main.py
 ```
 
 Une fenêtre s'ouvre avec le menu principal.
