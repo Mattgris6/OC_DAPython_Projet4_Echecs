@@ -27,7 +27,7 @@ class ViewRounds():
         self.canvas.configure(yscrollcommand=y_scrollbar.set)
         self.canvas.bind('<Configure>', lambda e: self.canvas.configure(scrollregion=self.canvas.bbox('all')))
         self.frame = tk.Frame(self.canvas)
-        self.canvas.create_window((0,0), window=self.frame, anchor="nw")
+        self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
         self.label_frame.pack(pady=5)
         # Quit window
         self.button_quit = ttk.Button(
@@ -36,10 +36,10 @@ class ViewRounds():
             command=self.cancel,
             )
         self.button_quit.pack(pady=5)
-    
+
     def cancel(self):
         self.window.destroy()
-        
+
     def display_rounds(self, tournament):
         for round in tournament.rounds:
             l_name = tk.Label(self.frame, text=round.name)

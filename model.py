@@ -36,16 +36,18 @@ class Player():
                     break
         return self.points
 
+
 class Tournament():
     NB_PLAYERS = 8
+
     def __init__(self, name, location, time_system='bullet', nb_round=4, description='', index=0):
         self.name = name
         self.location = location
         self.date_tournament = datetime.now().strftime("%d/%m/%Y")
         self.time_system = time_system
         self.nb_round = nb_round
-        self.players : List[Player] = []
-        self.rounds : List[Round] = []
+        self.players: List[Player] = []
+        self.rounds: List[Round] = []
         self.description = description
         self.index = index
 
