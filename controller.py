@@ -1,10 +1,10 @@
-from view_main_menu import MainMenu
-from view_create_tournament import CreateTournament
-from view_create_player import CreatePlayer
-from view_players import ViewPlayer
-from view_rounds import ViewRounds
-from view_tournament_menu import TournamentMenu
-from view_tournaments import ViewTournaments
+from view.view_main_menu import MainMenu
+from view.view_create_tournament import CreateTournament
+from view.view_create_player import CreatePlayer
+from view.view_players import ViewPlayer
+from view.view_rounds import ViewRounds
+from view.view_tournament_menu import TournamentMenu
+from view.view_tournaments import ViewTournaments
 
 from model import Tournament, Player, Round
 

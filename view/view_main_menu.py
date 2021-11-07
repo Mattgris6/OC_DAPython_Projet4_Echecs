@@ -46,7 +46,7 @@ class MainMenu():
         self.button_quit.place(relx=0.8, rely=0.9, anchor=tk.CENTER)
         # Insert an image of chess
         main_path = os.path.abspath(os.path.dirname(__file__))
-        image_file = main_path + r'/Ressources/image_menu.png'
+        image_file = main_path + r'/../Ressources/image_menu.png'
         image_menu = Image.open(image_file)
         image_menu = image_menu.resize((105, 105), Image.ANTIALIAS)
         image_menu = ImageTk.PhotoImage(image_menu)
