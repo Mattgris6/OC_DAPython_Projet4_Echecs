@@ -52,7 +52,7 @@ Sélectionnez le joueur dans la liste et cliquez sur "Afficher les infos".
 Après toute modification, vous pouvez enregistrer en cliquant sur "Enregistrer les modifications"
 
 ### Base de données de démonstration
-Une base de données de démo est fournie sur ce dépo. Tout les données présentes sont fictives.
+Une base de données de démo est fournie sur ce dépôt. Tout les données présentes sont fictives.
 
 ## Vérification du code
 Pour vérifier la conformité du code et générer un rapport flake8, vous pouvez lancer le script ctrl_flake8.py:
