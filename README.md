@@ -39,3 +39,9 @@ Depuis le menu principal, vous pouvez accéder à la liste de tous les joueurs e
 C'est là que vous allez pouvoir modifier les informations d'un joueur, et notamment son classement en fonction de ses résultats.
 
 Une base de données de démo est fournie sur ce dépo.
+
+Pour vérifier la conformité du code et générer un rapport flake8, vous pouvez lancer le script ctrl_flake8.py:
+
+```sh
+python ctrl_flake8.py
+```
