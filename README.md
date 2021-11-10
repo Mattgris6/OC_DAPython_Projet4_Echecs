@@ -24,7 +24,7 @@ Maintenant que vous êtes dans l'environnement virtuel, installez les paquets re
 pip install -r requirements.txt
 ```
 
-Le programme utilise tkinter pour l'interface graphique, il faudra donc s'assurer de l'avoir installer préalablement.
+Le programme utilise tkinter pour l'interface graphique, il faudra donc s'assurer de l'avoir installé préalablement.
 
 ## Utilisation
 Ensuite, vous pouvez lancer le programme avec :
