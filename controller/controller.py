@@ -160,7 +160,7 @@ class Controller():
             elif self.t_display_type == 'name':
                 tournament = self.name_order_tournaments[selected_id]
         self.v_tournaments.display_tournament_info(tournament)
-    
+
     # Historic
     def run_tournament(self):
         """Call back to display info of the selected tournament"""
