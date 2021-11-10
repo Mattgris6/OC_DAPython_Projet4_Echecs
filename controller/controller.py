@@ -15,6 +15,7 @@ from tkinter.constants import DISABLED
 import re
 from tinydb import TinyDB
 from datetime import datetime
+from copy import deepcopy
 
 
 class Controller():
@@ -87,7 +88,8 @@ class Controller():
             )
             i_tournament.date_tournament = tournament.get('date_tournament')
             i_tournament.players = [self.instanced_players[player - 1] for player in tournament.get('players')]
-            i_tournament.rounds = [self.instanced_round(round) for round in tournament.get('rounds')]
+            for round in tournament.get('rounds'):
+                i_tournament.rounds.append(self.instanced_round(round))
             tournaments.append(i_tournament)
         return tournaments
 
@@ -106,7 +108,7 @@ class Controller():
         i_round = Round(round.get('name'))
         i_round.date_begin = round.get('date_begin')
         i_round.date_end = round.get('date_end')
-        i_round.matchs = round.get('matchs')
+        i_round.matchs = deepcopy(round.get('matchs'))
         for match in i_round.matchs:
             if isinstance(match[0][0], int):
                 match[0][0] = self.instanced_players[match[0][0] - 1]
@@ -129,7 +131,7 @@ class Controller():
         if self.v_create_tournament.tournament:
             s_tournament = self.v_create_tournament.tournament.serial_tournament
             self.serialized_tournament.append(s_tournament)
-            self.v_create_tournament.tournament.index = self.serialized_tournament.index(s_tournament)
+            self.v_create_tournament.tournament.id = self.serialized_tournament.index(s_tournament)
             self.save_base_tournament()
             self.begin_tournament(self.v_create_tournament.tournament)
 
@@ -144,8 +146,10 @@ class Controller():
         self.v_tournaments.b_order_pname.config(command=self.order_player_name)
         self.v_tournaments.b_order_points.config(command=self.order_player_points)
         self.v_tournaments.b_order_rank.config(command=self.order_player_rank)
+        self.v_tournaments.b_run.config(command=self.run_tournament)
         self.t_display_date()
 
+    # Historic
     def display_tournament(self):
         """Call back to display info of the selected tournament"""
         selected = self.v_tournaments.tournament_list.curselection()
@@ -156,17 +160,32 @@ class Controller():
             elif self.t_display_type == 'name':
                 tournament = self.name_order_tournaments[selected_id]
         self.v_tournaments.display_tournament_info(tournament)
+    
+    # Historic
+    def run_tournament(self):
+        """Call back to display info of the selected tournament"""
+        selected = self.v_tournaments.tournament_list.curselection()
+        selected_id = self.v_tournaments.tournament_list.curselection()[0]
+        if selected:
+            if self.t_display_type == 'date':
+                tournament = self.date_order_tournaments[selected_id]
+            elif self.t_display_type == 'name':
+                tournament = self.name_order_tournaments[selected_id]
+        self.begin_tournament(tournament)
 
+    # Historic
     def t_display_date(self):
         """Order the listbox by date"""
         self.v_tournaments.display_list(self.date_order_tournaments)
         self.t_display_type = 'date'
 
+    # Historic
     def t_display_name(self):
         """Order the listbox by name"""
         self.v_tournaments.display_list(self.name_order_tournaments)
         self.t_display_type = 'name'
 
+    # Historic
     def display_rounds(self):
         """Display the rounds of the selected tournament"""
         id = self.v_tournaments.id.cget("text")
@@ -175,6 +194,7 @@ class Controller():
             self.v_rounds = ViewRounds()
             self.v_rounds.display_rounds(tournament)
 
+    # Historic
     def order_player_name(self):
         """Order the players of the selected tournament by name"""
         id = self.v_tournaments.id.cget("text")
@@ -184,6 +204,7 @@ class Controller():
             players = sorted(players, key=lambda tri: tri.name)
             self.v_tournaments.order_player_frame(tournament, players)
 
+    # Historic
     def order_player_points(self):
         """Order the players of the selected tournament by points"""
         id = self.v_tournaments.id.cget("text")
@@ -193,6 +214,7 @@ class Controller():
             players = sorted(players, key=lambda tri: tri.set_points(tournament), reverse=True)
             self.v_tournaments.order_player_frame(tournament, players)
 
+    # Historic
     def order_player_rank(self):
         """Order players of the selected tournament by rank"""
         id = self.v_tournaments.id.cget("text")
@@ -201,7 +223,7 @@ class Controller():
             players = sorted(tournament.players, key=lambda tri: tri.ranking, reverse=True)
             self.v_tournaments.order_player_frame(tournament, players)
 
-    # Main menu
+    # Main menu (players)
     def show_players(self):
         """Show all players in base"""
         self.v_players = ViewPlayer()
@@ -211,6 +233,7 @@ class Controller():
         self.v_players.b_save.config(command=self.save_changes)
         self.display_ranking()
 
+    # Players
     def display_player(self):
         """Call back to display info of the selected player"""
         selected = self.v_players.player_list.curselection()
@@ -222,16 +245,19 @@ class Controller():
                 player = self.ranking_order_players[selected_id]
         self.v_players.display_player_info(player)
 
+    # Players
     def display_alphabetic(self):
         """Order the listbox  by alphabetic"""
         self.v_players.display_list(self.alphabetic_order_players)
         self.p_display_type = 'alphabetic'
 
+    # Players
     def display_ranking(self):
         """Order the listbox by ranking"""
         self.v_players.display_list(self.ranking_order_players)
         self.p_display_type = 'ranking'
 
+    # Players
     def save_changes(self):
         """Save the changes of selected player"""
         if self.v_players.id.cget("text") != '':
@@ -334,6 +360,7 @@ class Controller():
         self.v_create_player.ranking.insert(0, player.get('ranking'))
         self.v_create_player.radio_value.set(player.get('sex'))
 
+    # Create player
     def save_player(self, new_player):
         """Add player in base"""
         # Check if the new player already in base
@@ -344,14 +371,16 @@ class Controller():
             check_players.append(s_p_check)
         if check_player not in check_players:
             self.serialized_players.append(new_player.serial_player)
-        new_player.index = self.serialized_players.index(new_player.serial_player) + 1
+        new_player.id = self.serialized_players.index(new_player.serial_player) + 1
         self.save_base_player()
 
+    # Data base
     def save_base_player(self):
         """Save the player table in base"""
         self.players_table.truncate()
         self.players_table.insert_multiple(self.serialized_players)
 
+    # Data base
     def save_base_tournament(self):
         """Save the tournament table in base"""
         self.tournament_table.truncate()
@@ -362,7 +391,11 @@ class Controller():
         """Start a new tournament"""
         self.v_tournament_menu = TournamentMenu(tournament)
         self.v_tournament_menu.round_save_button.config(command=self.save_round)
-        self.begin_next_round()
+        if len(self.v_tournament_menu.tournament.rounds) == int(self.v_tournament_menu.tournament.nb_round):
+            self.v_tournament_menu.round_save_button.config(state=DISABLED)
+            self.v_tournament_menu.end_tournament()
+        else:
+            self.begin_next_round()
 
     # Tournament menu
     def begin_next_round(self):
@@ -397,11 +430,9 @@ class Controller():
             elif resultat == 'Match nul':
                 match[0][1] = 0.5
                 match[1][1] = 0.5
-            match[0][0].points += match[0][1]
-            match[1][0].points += match[1][1]
         self.v_tournament_menu.display_ranking()
         s_tournament = self.v_tournament_menu.tournament.serial_tournament
-        self.serialized_tournament[self.v_tournament_menu.tournament.index] = s_tournament
+        self.serialized_tournament[self.v_tournament_menu.tournament.id] = s_tournament
         self.save_base_tournament()
         if len(self.v_tournament_menu.tournament.rounds) == int(self.v_tournament_menu.tournament.nb_round):
             self.v_tournament_menu.round_save_button.config(state=DISABLED)
@@ -443,7 +474,11 @@ class Controller():
             key=lambda tri: tri.ranking,
             reverse=True,
             )
-        players = sorted(players, key=lambda tri: tri.points, reverse=True)
+        players = sorted(
+            players,
+            key=lambda tri: tri.set_points(self.v_tournament_menu.tournament),
+            reverse=True
+            )
         matchs = []
         trying_pair = []
         ctrl = 0

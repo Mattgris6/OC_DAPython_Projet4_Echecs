@@ -51,10 +51,11 @@ class TournamentMenu():
             pady=5,
             )
         players = sorted(self.tournament.players, key=lambda tri: tri.ranking, reverse=True)
-        players = sorted(players, key=lambda tri: tri.points, reverse=True)
+        tournament = self.tournament
+        players = sorted(players, key=lambda p: p.set_points(tournament), reverse=True)
         for player in players:
             player_index = players.index(player)
-            player_title = f'{player.name} {player.first_name} : {player.points}pts'
+            player_title = f'{player.name} {player.first_name} : {player.set_points(self.tournament)}pts'
             player_label = ttk.Label(self.ranking_frame, text=player_title)
             player_label.grid(row=player_index, column=0)
 

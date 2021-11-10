@@ -37,6 +37,12 @@ class ViewTournaments():
             text="Afficher les infos",
             )
         self.b_show.grid(row=0, column=2, padx=5, pady=5)
+        # Display player information to change it
+        self.b_run = ttk.Button(
+            self.window,
+            text="Reprendre",
+            )
+        self.b_run.grid(row=8, column=0, padx=5, pady=5)
         # Info of one tournament
         self.l_id = ttk.Label(self.window, text="id en base : ")
         self.l_id.grid(row=0, column=3, padx=5, pady=5, sticky="E")
@@ -112,7 +118,7 @@ class ViewTournaments():
         self.window.destroy()
 
     def display_tournament_info(self, tournament):
-        self.id.config(text=tournament.index)
+        self.id.config(text=tournament.id)
         self.name.config(text=tournament.name)
         self.date.config(text=tournament.date_tournament)
         self.location.config(text=tournament.location)

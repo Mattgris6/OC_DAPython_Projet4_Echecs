@@ -94,7 +94,7 @@ class ViewPlayer():
         self.window.destroy()
 
     def display_player_info(self, player):
-        self.id.config(text=player.index)
+        self.id.config(text=player.id)
         self.name.delete(0, tk.END)
         self.name.insert(0, player.name)
         self.first_name.delete(0, tk.END)
